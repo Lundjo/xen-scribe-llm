@@ -22,14 +22,7 @@ class InferenceSession {
       if (arg1 === null) {
         throw new TypeError("Unexpected argument[1]: cannot be null.");
       }
-      if (arg1 instanceof _tensor__WEBPACK_IMPORTED_MODULE_1__.Tensor) {
-        throw new TypeError("'fetches' cannot be a Tensor");
-      }
-      if (Array.isArray(arg1)) {
-        if (arg1.length === 0) {
-          throw new TypeError("'fetches' cannot be an empty array.");
-        }
-        isFetchesEmpty = false;
+     
 
         for (const name of arg1) {
           if (typeof name !== "string") {
