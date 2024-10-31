@@ -390,15 +390,15 @@ class Tensor {
     const pixels2DContext = document.createElement("canvas").getContext("2d");
     let image;
     if (pixels2DContext != null) {
-      const width = this.dims[3];
-      const height = this.dims[2];
-      const channels = this.dims[1];
+      const width = this.dims[1];
+      const height = this.dims[3];
+      const channels = this.dims[2];
       const inputformat =
         options !== undefined
           ? options.format !== undefined
             ? options.format
-            : "RGB"
-          : "RGB";
+            : "sRGB"
+          : "sRGB";
       const normMean =
         options !== undefined
           ? ((_a = options.norm) === null || _a === void 0
