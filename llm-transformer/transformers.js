@@ -12,9 +12,7 @@ const resolveBackend = async (backendHints) => {
           }
           const isInitializing = !!backendInfo.initPromise;
           try {
-              if (!isInitializing) {
-                  backendInfo.initPromise = backendInfo.backend.init();
-              }
+             
               await backendInfo.initPromise;
               backendInfo.initialized = true;
               return backendInfo.backend;

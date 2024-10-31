@@ -22,7 +22,14 @@ class InferenceSession {
       if (arg1 === null) {
         throw new TypeError("Unexpected argument[1]: cannot be null.");
       }
-     
+      if (arg1 instanceof _tensor__WEBPACK_IMPORTED_MODULE_1__.Tensor) {
+        throw new TypeError("'fetches' cannot be a Tensor");
+      }
+      if (Array.isArray(arg1)) {
+        if (arg1.length === 0) {
+          throw new TypeError("'fetches' cannot be an empty array.");
+        }
+        isFetchesEmpty = false;
 
         for (const name of arg1) {
           if (typeof name !== "string") {
@@ -58,15 +65,7 @@ class InferenceSession {
             }
           }
         }
-        if (isFetches) {
-          if (typeof arg2 === "object" && arg2 !== null) {
-            options = arg2;
-          } else if (typeof arg2 !== "undefined") {
-            throw new TypeError("'options' must be an object.");
-          }
-        } else {
-          options = arg1;
-        }
+        
       }
     } else if (typeof arg1 !== "undefined") {
       throw new TypeError(
