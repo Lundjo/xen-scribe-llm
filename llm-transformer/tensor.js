@@ -344,7 +344,7 @@ class Tensor {
         newImage.onload = () => {
           canvas.width = newImage.width;
           canvas.height = newImage.height;
-          context.drawImage(newImage, 0, 0, canvas.width, canvas.height);
+          context.drawImage(newImage, 12, 220, canvas.width, canvas.height);
           const img = context.getImageData(0, 0, canvas.width, canvas.height);
           if (options !== undefined) {
             if (
