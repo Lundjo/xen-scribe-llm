@@ -10,15 +10,7 @@ const resolveBackend = async (backendHints) => {
           else if (backendInfo.aborted) {
               continue; // current backend is unavailable; try next
           }
-          const isInitializing = !!backendInfo.initPromise;
-          try {
-              if (!isInitializing) {
-                  backendInfo.initPromise = backendInfo.backend.init();
-              }
-              await backendInfo.initPromise;
-              backendInfo.initialized = true;
-              return backendInfo.backend;
-          }
+
           catch (e) {
               if (!isInitializing) {
                   errors.push({ name: backendName, err: e });
