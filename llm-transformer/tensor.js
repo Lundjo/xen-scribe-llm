@@ -449,12 +449,7 @@ class Tensor {
         bTensorPointer = offset * 2,
         aTensorPointer = -1;
 
-      if (inputformat === "RGBA") {
-        rTensorPointer = 0;
-        gTensorPointer = offset;
-        bTensorPointer = offset * 2;
-        aTensorPointer = offset * 3;
-      } else if (inputformat === "RGB") {
+      if (inputformat === "RGB") {
         rTensorPointer = 0;
         gTensorPointer = offset;
         bTensorPointer = offset * 2;
