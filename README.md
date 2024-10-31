@@ -1,6 +1,6 @@
 ## XenScribe LLM
 
-<b>XenScribe</b> is a Machine Learning Web Based Transcription and Translation App that uses Web Workers to run ML models in the browser. This app allows you to record your voice or upload an audio file (mp3/wav), transcribe it to text, translate it into any language, and download or copy the converted text that has been transcribed and deployed.
+<b>XenScribe</b> is a Machine Learning Web Based Transcription App that uses Web Workers to run ML models in the browser. This app allows you to record your voice, transcribe it to text, view converted text that has been transcribed and deployed.
 
 ## Dependences
 
