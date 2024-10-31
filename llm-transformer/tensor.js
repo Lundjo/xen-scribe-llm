@@ -338,37 +338,7 @@ class Tensor {
         if (!image || !context) {
           return reject();
         }
-        const newImage = new Image();
-        newImage.crossOrigin = "Anonymous";
-        newImage.src = image;
-        newImage.onload = () => {
-          canvas.width = newImage.width;
-          canvas.height = newImage.height;
-          context.drawImage(newImage, 0, 0, canvas.width, canvas.height);
-          const img = context.getImageData(0, 0, canvas.width, canvas.height);
-          if (options !== undefined) {
-            if (
-              options.height !== undefined &&
-              options.height !== canvas.height
-            ) {
-              throw new Error(
-                "Image input config height doesn't match ImageBitmap height"
-              );
-            } else {
-              tensorConfig.height = canvas.height;
-            }
 
-            if (options.width !== undefined && options.width !== canvas.width) {
-              throw new Error(
-                "Image input config width doesn't match ImageBitmap width"
-              );
-            } else {
-              tensorConfig.width = canvas.width;
-            }
-          } else {
-            tensorConfig.height = canvas.height;
-            tensorConfig.width = canvas.width;
-          }
           resolve(Tensor.bufferToTensor(img.data, tensorConfig));
         };
       });

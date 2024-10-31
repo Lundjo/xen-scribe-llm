@@ -15,11 +15,7 @@ export default function Information(props) {
     tab === "transcription" ? output.map((val) => val.text) : translation || "";
 
   return (
-    <main className="flex flex-col items-center p-8 gap-8 text-center max-w-prose w-full mx-auto bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-xl shadow-lg">
-      <h1 className="font-normal bold text-3xl sm:text-4xl md:text-5xl text-white tracking-tight">
-        Rezultat <span className="text-primary-400">Transkripcije</span>
-      </h1>
-
+    <main className="flex flex-col items-center p-8 gap-8 text-center max-w-prose w-full mx-auto bg-gradient-to-br 
       <div className="flex w-full justify-center bg-white/10 rounded-xl shadow-md overflow-hidden text-white font-semibold">
         <button
           onClick={() => setTab("transcription")}
