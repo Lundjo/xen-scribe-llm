@@ -19,7 +19,19 @@ export default function FileDisplay(props) {
     <main className="flex flex-col items-center p-8 gap-6 text-center w-full max-w-lg mx-auto bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-xl shadow-lg border border-white/20">
       <h1 className="font-medium text-3xl sm:text-4xl md:text-4xl tracking-tight text-white">
         Priprema <span className="text-primary-400">Transkripcije</span>
-      
+      </h1>
+
+      <div className="text-left w-full mt-4 p-4 bg-white/10 rounded-lg shadow-inner border border-white/20">
+        <h3 className="font-semibold text-primary-300">Naziv datoteke</h3>
+        <p className="truncate text-white">
+          {file ? file.name : "Snimak glasa putem aplikacije"}
+        </p>
+      </div>
+
+      <div className="w-full mb-6">
+        <div className="w-full p-4 bg-gray-900/70 rounded-lg shadow-lg flex items-center justify-center">
+          <audio
+            ref={audioRef}
             className="w-full h-10 rounded-lg outline-none accent-primary-400"
             controls
           >
