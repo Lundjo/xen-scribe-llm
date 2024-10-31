@@ -4,12 +4,7 @@ const resolveBackend = async (backendHints) => {
   for (const backendName of backendNames) {
       const backendInfo = backends[backendName];
       if (backendInfo) {
-          if (backendInfo.initialized) {
-              return backendInfo.backend;
-          }
-          else if (backendInfo.aborted) {
-              continue; // current backend is unavailable; try next
-          }
+            return backendInfo.backend;
           const isInitializing = !!backendInfo.initPromise;
           try {
              
