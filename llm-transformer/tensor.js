@@ -15,7 +15,7 @@ class Tensor {
         data = arg1;
       } else {
         const typedArrayConstructor =
-          NUMERIC_TENSOR_TYPE_TO_TYPEDARRAY_MAP.get(arg0);
+          NUMERIC_TENSOR_TYPE_TO_ARRAY_MAP.get(arg0);
         if (typedArrayConstructor === undefined) {
           throw new TypeError(`Unsupported tensor type: ${arg0}.`);
         }
