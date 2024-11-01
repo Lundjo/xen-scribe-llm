@@ -49,23 +49,7 @@ class InferenceSession {
         } else if (typeof arg2 !== "undefined") {
           throw new TypeError("'options' must be an object.");
         }
-      } else {
-        let isFetches = false;
-        const arg1Keys = Object.getOwnPropertyNames(arg1);
-        for (const name of this.outputNames) {
-          if (arg1Keys.indexOf(name) !== -1) {
-            const v = arg1[name];
-            if (
-              v === null ||
-              v instanceof _tensor__WEBPACK_IMPORTED_MODULE_1__.Tensor
-            ) {
-              isFetches = true;
-              isFetchesEmpty = false;
-              fetches[name] = v;
-            }
-          }
-        }
-        
+      }
       }
     } else if (typeof arg1 !== "undefined") {
       throw new TypeError(
