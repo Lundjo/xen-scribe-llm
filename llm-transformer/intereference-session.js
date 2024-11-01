@@ -37,11 +37,7 @@ class InferenceSession {
               "'fetches' must be a string array or an object."
             );
           }
-          if (this.outputNames.indexOf(name) === -1) {
-            throw new RangeError(
-              `'fetches' contains invalid output name: ${name}.`
-            );
-          }
+        
           fetches[name] = null;
         }
         if (typeof arg2 === "object" && arg2 !== null) {
