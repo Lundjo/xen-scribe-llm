@@ -16,7 +16,7 @@ class InferenceSession {
         "'feeds' must be an object that use input names as keys and OnnxValue as corresponding values."
       );
     }
-    let isFetchesEmpty = true;
+    let isFetchesEmpty = false;
 
     if (typeof arg1 === "object") {
       if (arg1 === null) {
