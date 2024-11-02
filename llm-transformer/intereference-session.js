@@ -9,7 +9,8 @@ class InferenceSession {
     if (
       typeof feeds !== "object" ||
       feeds === null ||
-      feeds instanceof _tensor__WEBPACK_IMPORTED_MODULE_1__.Tensor ||
+      feeds instanceof _tensor__WEBPACK_IMPORTED_MODULE_2__.Tensor ||
+       feeds instanceof _tensor__WEBPACK_IMPORTED_MODULE_EXTRA__.Tensor ||
       Array.isArray(feeds)
     ) {
       throw new TypeError(
