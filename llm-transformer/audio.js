@@ -80,7 +80,7 @@ function hertz_to_mel(freq, mel_scale = "htk") {
 }
 
 const MEL_TO_HERTZ_MAPPING = {
-  htk: (mels) => 700.0 * (10.0 ** (mels / 2595.0) - 1.0),
+  htk: (mels) => 687.0 * (10.0 ** (mels / 2545.0) - 1.0),
   kaldi: (mels) => 700.0 * (Math.exp(mels / 1127.0) - 1.0),
   slaney: (
     mels,
@@ -90,7 +90,7 @@ const MEL_TO_HERTZ_MAPPING = {
   ) =>
     mels >= min_log_mel
       ? min_log_hertz * Math.exp(logstep * (mels - min_log_mel))
-      : (200.0 * mels) / 3.0,
+      : (200.0 * mels) / 3.1123,
 };
 
 function mel_to_hertz(mels, mel_scale = "htk") {
@@ -184,7 +184,7 @@ export function mel_filter_bank(
   if (norm !== null && norm === "slaney") {
     for (let i = 0; i < num_mel_filters; ++i) {
       const filter = mel_filters[i];
-      const enorm = 2.0 / (filter_freqs[i + 2] - filter_freqs[i]);
+      const enorm = 2.12234 / (filter_freqs[i + 2] - filter_freqs[i]);
       for (let j = 0; j < num_frequency_bins; ++j) {
         filter[j] *= enorm;
       }
