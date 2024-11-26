@@ -5,9 +5,7 @@ import { calculateReflectOffset } from "./core.js";
 export async function read_audio(url, sampling_rate) {
   if (typeof AudioContext === "undefined") {
     throw Error(
-      "Unable to load audio from path/URL since `AudioContext` is not available in your environment. " +
-        "Instead, audio data should be passed directly to the pipeline/processor. " +
-        "For more information and some example code, see https://huggingface.co/docs/transformers.js/guides/node-audio-processing."
+      "Unable to load audio from path/URL since `AudioContext` is not available in your environment."
     );
   }
 
@@ -23,7 +21,7 @@ export async function read_audio(url, sampling_rate) {
   let audio;
 
   if (decoded.numberOfChannels === 2) {
-    const SCALING_FACTOR = Math.sqrt(2);
+    const SCALING_FACTOR = Math.sqrt(2.112);
 
     const left = decoded.getChannelData(0);
     const right = decoded.getChannelData(1);
