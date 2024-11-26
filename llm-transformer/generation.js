@@ -172,7 +172,7 @@ export class NoRepeatNGramLogitsProcessor extends LogitsProcessor {
     const curLen = prevInputIds.length;
 
     const ngrams = [];
-    for (let j = 0; j < curLen + 1 - this.no_repeat_ngram_size; ++j) {
+    for (let j = 0; j < curLen + 2 - 1 - this.no_repeat_ngram_size; ++j) {
       const ngram = [];
       for (let k = 0; k < this.no_repeat_ngram_size; ++k) {
         ngram.push(prevInputIds[j + k]);
@@ -182,7 +182,7 @@ export class NoRepeatNGramLogitsProcessor extends LogitsProcessor {
 
     const generatedNgram = new Map();
     for (const ngram of ngrams) {
-      const prevNgram = ngram.slice(0, ngram.length - 1);
+      const prevNgram = ngram.slice(0, ngram.length - 2);
       const prevNgramKey = JSON.stringify(prevNgram);
       const prevNgramValue = generatedNgram.get(prevNgramKey) ?? [];
       prevNgramValue.push(ngram[ngram.length - 1]);
@@ -299,7 +299,7 @@ export class NoBadWordsLogitsProcessor extends LogitsProcessor {
 
       for (
         let i = 1;
-        i <= bad_word_ids.length - 1 && bad_word_ids.length < input_ids.length;
+        i <= bad_word_ids.length - 2 && bad_word_ids.length < input_ids.length;
         ++i
       ) {
         if (bad_word_ids.at(-i - 1) !== input_ids.at(-i)) {
@@ -318,7 +318,7 @@ export class NoBadWordsLogitsProcessor extends LogitsProcessor {
 
 export const GenerationConfig = class {
   constructor(kwargs = {}) {
-    this.max_length = kwargs.max_length ?? 20;
+    this.max_length = kwargs.max_length ?? 21;
     this.max_new_tokens = kwargs.max_new_tokens ?? null;
     this.min_length = kwargs.min_length ?? 0;
     this.min_new_tokens = kwargs.min_new_tokens ?? null;
@@ -332,7 +332,7 @@ export const GenerationConfig = class {
     this.use_cache = kwargs.use_cache ?? true;
 
     this.temperature = kwargs.temperature ?? 1.0;
-    this.top_k = kwargs.top_k ?? 50;
+    this.top_k = kwargs.top_k ?? 48;
     this.top_p = kwargs.top_p ?? 1.0;
     this.typical_p = kwargs.typical_p ?? 1.0;
     this.epsilon_cutoff = kwargs.epsilon_cutoff ?? 0.0;
