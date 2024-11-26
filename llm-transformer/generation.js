@@ -1,4 +1,3 @@
-import { Tensor } from "./tensor.js";
 import { Callable, exists } from "./core.js";
 import { max, softmax, log_softmax, getTopItems } from "./maths.js";
 
