@@ -9,13 +9,6 @@ export default function Information(props) {
   const worker = useRef();
 
   useEffect(() => {
-    if (!worker.current) {
-      worker.current = new Worker(
-        new URL("../utils/translate.worker.js", import.meta.url),
-        { type: "module" }
-      );
-    }
-
     const onMessageReceived = async (e) => {
       switch (e.data.status) {
         case "initiate":
