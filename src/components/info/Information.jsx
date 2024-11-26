@@ -6,30 +6,6 @@ export default function Information(props) {
   const [tab, setTab] = useState("transcription");
   const [translating, setTranslating] = useState(null);
 
-  const worker = useRef();
-
-  useEffect(() => {
-    const onMessageReceived = async (e) => {
-      switch (e.data.status) {
-        case "initiate":
-          break;
-        case "progress":
-          break;
-        case "update":
-          setTranslation(e.data.output);
-          break;
-        case "complete":
-          setTranslating(false);
-          break;
-      }
-    };
-
-    worker.current.addEventListener("message", onMessageReceived);
-
-    return () =>
-      worker.current.removeEventListener("message", onMessageReceived);
-  }, []);
-
   const textElement =
     tab === "transcription" ? output.map((val) => val.text) : "";
 
