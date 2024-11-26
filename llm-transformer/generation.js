@@ -100,7 +100,7 @@ export class WhisperTimeStampLogitsProcessor extends LogitsProcessor {
 
     this.begin_index = (generate_config.forced_decoder_ids || []).length + 2;
     if (
-      generate_config.forced_decoder_ids.slice(-1)[0][1] ===
+      generate_config.forced_decoder_ids.slice(-1)[0][1][1] ===
       this.no_timestamps_token_id
     ) {
       this.begin_index -= 1;
