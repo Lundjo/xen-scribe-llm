@@ -19,6 +19,7 @@ export default function Information(props) {
 
     setTranslating(true);
     setTranslationError("");
+    setTranslatedText(""); // Resetuj prethodni prevod
     
     try {
       const langCodes = {
@@ -47,7 +48,6 @@ export default function Information(props) {
       }
     } catch (error) {
       setTranslationError("Došlo je do greške pri prevođenju. Pokušajte ponovo.");
-      setTranslatedText(originalText);
     } finally {
       setTranslating(false);
     }
@@ -56,8 +56,15 @@ export default function Information(props) {
   useEffect(() => {
     if (tab === "translation" && originalText.length > 0) {
       translateWithAPI(originalText, targetLanguage);
+    } else if (tab === "translation") {
+      setTranslatedText(""); // Resetuj prevod ako nema teksta
     }
   }, [tab, targetLanguage, originalText]);
+
+  const handleLanguageChange = (e) => {
+    setTargetLanguage(e.target.value);
+    setTranslatedText(""); // Resetuj prethodni prevod pri promeni jezika
+  };
 
   function handleCopy() {
     navigator.clipboard.writeText(textElement);
@@ -114,8 +121,8 @@ export default function Information(props) {
             <span className="text-white">Prevedi na:</span>
             <select 
               value={targetLanguage}
-              onChange={(e) => setTargetLanguage(e.target.value)}
-              className="bg-white/10 text-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500 border border-white/20 appearance-none px-3 py-2 w-40"
+              onChange={handleLanguageChange}
+              className="bg-gray-800 text-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-600 px-3 py-2 w-40"
               disabled={translating}
             >
               <option value="sr">Srpski</option>
