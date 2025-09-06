@@ -31,7 +31,7 @@ export default function Information(props) {
     try {
       const translationPipeline = await pipeline(
         "translation",
-        "Xenova/nllb-200-distilled-600M"
+        "Xenova/t5-small"
       );
       
       setTranslator(() => translationPipeline);
@@ -42,7 +42,38 @@ export default function Information(props) {
     }
   };
 
-  const translateText = async (text, targetLang) => {
+  const translateWithAPI = async (text, targetLang) => {
+    setTranslating(true);
+    setTranslationError("");
+    
+    try {
+      const response = await fetch("https://api.mymemory.translated.net/get", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          q: text,
+          langpair: `en|${targetLang}`
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.responseStatus === 200) {
+        setTranslatedText(data.responseData.translatedText);
+      } else {
+        throw new Error("API prevod nije uspeo");
+      }
+    } catch (error) {
+      setTranslationError("Došlo je do greške pri prevođenju. Pokušajte ponovo.");
+      setTranslatedText(originalText);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  const translateWithModel = async (text, targetLang) => {
     if (!translator || text.trim().length === 0) {
       return;
     }
@@ -51,18 +82,14 @@ export default function Information(props) {
     setTranslationError("");
     
     try {
-      const langCodes = {
-        sr: "srp_Latn",
-        es: "spa_Latn", 
-        fr: "fra_Latn",
-        de: "deu_Latn",
-        it: "ita_Latn",
+      const langPrefixes = {
+        fr: "translate English to French: ",
+        de: "translate English to German: ",
       };
       
-      const result = await translator(text, {
-        src_lang: "eng_Latn",
-        tgt_lang: langCodes[targetLang]
-      });
+      const prefix = langPrefixes[targetLang];
+      
+      const result = await translator(prefix + text);
       
       setTranslatedText(result[0].translation_text);
     } catch (error) {
@@ -70,6 +97,16 @@ export default function Information(props) {
       setTranslatedText(originalText);
     } finally {
       setTranslating(false);
+    }
+  };
+
+  const translateText = async (text, targetLang) => {
+    const modelLanguages = ["fr", "de"];
+    
+    if (modelLanguages.includes(targetLang)) {
+      translateWithModel(text, targetLang);
+    } else {
+      translateWithAPI(text, targetLang);
     }
   };
 
