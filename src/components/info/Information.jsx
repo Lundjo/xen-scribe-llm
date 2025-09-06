@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Transcription from "../transcribe/Transcription";
 import { pipeline, env } from "@xenova/transformers";
 
-env.allowLocalModels = false; 
+env.allowLocalModels = false;
 env.backends.onnx.wasm.numThreads = 1;
 
 export default function Information(props) {
@@ -13,13 +13,10 @@ export default function Information(props) {
   const [targetLanguage, setTargetLanguage] = useState("sr");
   const [translator, setTranslator] = useState(null);
   const [isTranslatorLoading, setIsTranslatorLoading] = useState(false);
+  const [translationError, setTranslationError] = useState("");
 
-  const textElement =
-    tab === "transcription" 
-      ? output.map((val) => val.text).join(" ") 
-      : tab === "translation" 
-        ? translatedText 
-        : "";
+  const originalText = output.map((val) => val.text).join(" ");
+  const textElement = tab === "transcription" ? originalText : translatedText;
 
   useEffect(() => {
     if (tab === "translation" && !translator) {
@@ -29,14 +26,27 @@ export default function Information(props) {
 
   const initializeTranslator = async () => {
     setIsTranslatorLoading(true);
+    setTranslationError("");
+    
     try {
+      console.log("Inicijalizacija pipeline-a za prevođenje...");
+      
       const translationPipeline = await pipeline(
         "translation",
-        "Xenova/nllb-200-distilled-600M"
+        "Xenova/m2m100_418M", 
+        {
+          revision: "fp16", 
+          progress_callback: (data) => {
+            console.log("Progress:", data);
+          }
+        }
       );
-      setTranslator(translationPipeline);
+      
+      setTranslator(() => translationPipeline);
+      console.log("Pipeline uspešno inicijalizovan");
     } catch (error) {
       console.error("Greška pri učitavanju translatora:", error);
+      setTranslationError("Neuspešno učitavanje modela za prevođenje. Pokušajte ponovo.");
     } finally {
       setIsTranslatorLoading(false);
     }
@@ -48,40 +58,46 @@ export default function Information(props) {
     }
 
     setTranslating(true);
+    setTranslationError("");
+    
     try {
       const langMap = {
-        en: "eng_Latn",
-        es: "spa_Latn", 
-        fr: "fra_Latn",
-        de: "deu_Latn",
-        it: "ita_Latn",
-        sr: "srp_Cyrl",
+        en: "en",
+        es: "es", 
+        fr: "fr",
+        de: "de",
+        it: "it",
+        sr: "sr",
       };
       
-      const modelLangCode = langMap[targetLang] || "srp_Cyrl";
+      const modelLangCode = langMap[targetLang] || "sr";
+      
+      console.log("Početak prevođenja...");
       
       const result = await translator(text, {
-        src_lang: "eng_Latn",
+        src_lang: "en", 
         tgt_lang: modelLangCode,
       });
       
       setTranslatedText(result[0].translation_text);
+      console.log("Prevođenje uspešno završeno");
     } catch (error) {
       console.error("Greška pri prevođenju:", error);
-      setTranslatedText("Došlo je do greške pri prevođenju. Pokušajte ponovo.");
+      setTranslationError("Došlo je do greške pri prevođenju. Pokušajte ponovo.");
+      
+      setTranslatedText(originalText);
     } finally {
       setTranslating(false);
     }
   };
 
   useEffect(() => {
-    if (tab === "translation" && translator && output.length > 0) {
-      const textToTranslate = output.map(val => val.text).join(" ");
-      if (textToTranslate.trim().length > 0) {
-        translateText(textToTranslate, targetLanguage);
-      }
+    if (tab === "translation" && translator && originalText.length > 0) {
+      translateText(originalText, targetLanguage);
+    } else if (tab === "translation" && originalText.length > 0 && !translator && !isTranslatorLoading) {
+      initializeTranslator();
     }
-  }, [tab, targetLanguage, output, translator]);
+  }, [tab, targetLanguage, originalText, translator]);
 
   function handleCopy() {
     navigator.clipboard.writeText(textElement);
@@ -95,6 +111,13 @@ export default function Information(props) {
     document.body.appendChild(element);
     element.click();
   }
+
+  const handleRetryTranslation = () => {
+    setTranslationError("");
+    if (originalText.length > 0) {
+      translateText(originalText, targetLanguage);
+    }
+  };
 
   return (
     <main className="flex flex-col items-center p-8 gap-8 text-center max-w-prose w-full mx-auto bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-xl shadow-lg">
@@ -115,11 +138,12 @@ export default function Information(props) {
         </button>
         <button
           onClick={() => setTab("translation")}
+          disabled={isTranslatorLoading}
           className={`w-1/2 py-2 transition duration-200 ${
             tab === "translation"
               ? "bg-primary-500 text-white"
               : "text-primary-300 hover:bg-primary-600 hover:text-white"
-          }`}
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           Prevod
         </button>
@@ -132,12 +156,10 @@ export default function Information(props) {
             <select 
               value={targetLanguage}
               onChange={(e) => setTargetLanguage(e.target.value)}
-              className="bg-white/10 text-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              disabled={translating}
+              className="bg-white/10 text-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500 border border-white/20 appearance-none px-3 py-2 w-40"
+              disabled={translating || isTranslatorLoading}
             >
               <option value="sr">Srpski</option>
-              <option value="hr">Hrvatski</option>
-              <option value="bs">Bosanski</option>
               <option value="es">Španski</option>
               <option value="fr">Francuski</option>
               <option value="de">Nemački</option>
@@ -166,6 +188,19 @@ export default function Information(props) {
             </span>
           </div>
         )}
+        
+        {translationError && (
+          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 text-red-200 w-full">
+            <p>{translationError}</p>
+            <button 
+              onClick={handleRetryTranslation}
+              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-white transition"
+            >
+              Pokušaj Ponovo
+            </button>
+          </div>
+        )}
+        
         <Transcription {...props} textElement={textElement} />
       </div>
 
