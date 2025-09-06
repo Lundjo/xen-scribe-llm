@@ -29,22 +29,13 @@ export default function Information(props) {
     setTranslationError("");
     
     try {
-      console.log("Inicijalizacija pipeline-a za prevođenje...");
-      
       const translationPipeline = await pipeline(
         "translation",
-        "Xenova/t5-small", 
-        {
-          progress_callback: (data) => {
-            console.log("Progress:", data);
-          }
-        }
+        "Xenova/nllb-200-distilled-600M"
       );
       
       setTranslator(() => translationPipeline);
-      console.log("Pipeline uspešno inicijalizovan");
     } catch (error) {
-      console.error("Greška pri učitavanju translatora:", error);
       setTranslationError("Neuspešno učitavanje modela za prevođenje. Pokušajte ponovo.");
     } finally {
       setIsTranslatorLoading(false);
@@ -60,26 +51,22 @@ export default function Information(props) {
     setTranslationError("");
     
     try {
-      const langPrefixes = {
-        sr: "translate English to Serbian: ",
-        es: "translate English to Spanish: ", 
-        fr: "translate English to French: ",
-        de: "translate English to German: ",
-        it: "translate English to Italian: ",
+      const langCodes = {
+        sr: "srp_Latn",
+        es: "spa_Latn", 
+        fr: "fra_Latn",
+        de: "deu_Latn",
+        it: "ita_Latn",
       };
       
-      const prefix = langPrefixes[targetLang] || "translate English to Serbian: ";
-      
-      console.log("Početak prevođenja...");
-      
-      const result = await translator(prefix + text);
+      const result = await translator(text, {
+        src_lang: "eng_Latn",
+        tgt_lang: langCodes[targetLang]
+      });
       
       setTranslatedText(result[0].translation_text);
-      console.log("Prevođenje uspešno završeno");
     } catch (error) {
-      console.error("Greška pri prevođenju:", error);
       setTranslationError("Došlo je do greške pri prevođenju. Pokušajte ponovo.");
-      
       setTranslatedText(originalText);
     } finally {
       setTranslating(false);
