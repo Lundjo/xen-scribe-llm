@@ -33,9 +33,8 @@ export default function Information(props) {
       
       const translationPipeline = await pipeline(
         "translation",
-        "Xenova/m2m100_418M", 
+        "Xenova/t5-small", 
         {
-          revision: "fp16", 
           progress_callback: (data) => {
             console.log("Progress:", data);
           }
@@ -61,23 +60,19 @@ export default function Information(props) {
     setTranslationError("");
     
     try {
-      const langMap = {
-        en: "en",
-        es: "es", 
-        fr: "fr",
-        de: "de",
-        it: "it",
-        sr: "sr",
+      const langPrefixes = {
+        sr: "translate English to Serbian: ",
+        es: "translate English to Spanish: ", 
+        fr: "translate English to French: ",
+        de: "translate English to German: ",
+        it: "translate English to Italian: ",
       };
       
-      const modelLangCode = langMap[targetLang] || "sr";
+      const prefix = langPrefixes[targetLang] || "translate English to Serbian: ";
       
       console.log("Početak prevođenja...");
       
-      const result = await translator(text, {
-        src_lang: "en", 
-        tgt_lang: modelLangCode,
-      });
+      const result = await translator(prefix + text);
       
       setTranslatedText(result[0].translation_text);
       console.log("Prevođenje uspešno završeno");
