@@ -47,16 +47,20 @@ export default function Information(props) {
     setTranslationError("");
     
     try {
-      const response = await fetch("https://api.mymemory.translated.net/get", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          q: text,
-          langpair: `en|${targetLang}`
-        })
-      });
+      const langCodes = {
+        sr: "sr",
+        es: "es", 
+        it: "it"
+      };
+      
+      const langpair = `en|${langCodes[targetLang]}`;
+      const encodedText = encodeURIComponent(text);
+      
+      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodedText}&langpair=${langpair}`);
+      
+      if (!response.ok) {
+        throw new Error("API greška");
+      }
       
       const data = await response.json();
       
@@ -102,11 +106,15 @@ export default function Information(props) {
 
   const translateText = async (text, targetLang) => {
     const modelLanguages = ["fr", "de"];
+    const apiLanguages = ["sr", "es", "it"];
     
     if (modelLanguages.includes(targetLang)) {
       translateWithModel(text, targetLang);
-    } else {
+    } else if (apiLanguages.includes(targetLang)) {
       translateWithAPI(text, targetLang);
+    } else {
+      setTranslationError("Ovaj jezik trenutno nije podržan");
+      setTranslatedText(originalText);
     }
   };
 
