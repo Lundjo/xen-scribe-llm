@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Transcription from "../transcribe/Transcription";
-import { pipeline, env } from "@xenova/transformers";
-
-env.allowLocalModels = false;
-env.backends.onnx.wasm.numThreads = 1;
 
 export default function Information(props) {
   const { output, finished } = props;
@@ -11,38 +7,16 @@ export default function Information(props) {
   const [translating, setTranslating] = useState(false);
   const [translatedText, setTranslatedText] = useState("");
   const [targetLanguage, setTargetLanguage] = useState("sr");
-  const [translator, setTranslator] = useState(null);
-  const [isTranslatorLoading, setIsTranslatorLoading] = useState(false);
   const [translationError, setTranslationError] = useState("");
 
   const originalText = output.map((val) => val.text).join(" ");
   const textElement = tab === "transcription" ? originalText : translatedText;
 
-  useEffect(() => {
-    if (tab === "translation" && !translator) {
-      initializeTranslator();
-    }
-  }, [tab, translator]);
-
-  const initializeTranslator = async () => {
-    setIsTranslatorLoading(true);
-    setTranslationError("");
-    
-    try {
-      const translationPipeline = await pipeline(
-        "translation",
-        "Xenova/t5-small"
-      );
-      
-      setTranslator(() => translationPipeline);
-    } catch (error) {
-      setTranslationError("Neuspešno učitavanje modela za prevođenje. Pokušajte ponovo.");
-    } finally {
-      setIsTranslatorLoading(false);
-    }
-  };
-
   const translateWithAPI = async (text, targetLang) => {
+    if (text.trim().length === 0) {
+      return;
+    }
+
     setTranslating(true);
     setTranslationError("");
     
@@ -50,6 +24,8 @@ export default function Information(props) {
       const langCodes = {
         sr: "sr",
         es: "es", 
+        fr: "fr",
+        de: "de",
         it: "it"
       };
       
@@ -77,54 +53,11 @@ export default function Information(props) {
     }
   };
 
-  const translateWithModel = async (text, targetLang) => {
-    if (!translator || text.trim().length === 0) {
-      return;
-    }
-
-    setTranslating(true);
-    setTranslationError("");
-    
-    try {
-      const langPrefixes = {
-        fr: "translate English to French: ",
-        de: "translate English to German: ",
-      };
-      
-      const prefix = langPrefixes[targetLang];
-      
-      const result = await translator(prefix + text);
-      
-      setTranslatedText(result[0].translation_text);
-    } catch (error) {
-      setTranslationError("Došlo je do greške pri prevođenju. Pokušajte ponovo.");
-      setTranslatedText(originalText);
-    } finally {
-      setTranslating(false);
-    }
-  };
-
-  const translateText = async (text, targetLang) => {
-    const modelLanguages = ["fr", "de"];
-    const apiLanguages = ["sr", "es", "it"];
-    
-    if (modelLanguages.includes(targetLang)) {
-      translateWithModel(text, targetLang);
-    } else if (apiLanguages.includes(targetLang)) {
-      translateWithAPI(text, targetLang);
-    } else {
-      setTranslationError("Ovaj jezik trenutno nije podržan");
-      setTranslatedText(originalText);
-    }
-  };
-
   useEffect(() => {
-    if (tab === "translation" && translator && originalText.length > 0) {
-      translateText(originalText, targetLanguage);
-    } else if (tab === "translation" && originalText.length > 0 && !translator && !isTranslatorLoading) {
-      initializeTranslator();
+    if (tab === "translation" && originalText.length > 0) {
+      translateWithAPI(originalText, targetLanguage);
     }
-  }, [tab, targetLanguage, originalText, translator]);
+  }, [tab, targetLanguage, originalText]);
 
   function handleCopy() {
     navigator.clipboard.writeText(textElement);
@@ -142,7 +75,7 @@ export default function Information(props) {
   const handleRetryTranslation = () => {
     setTranslationError("");
     if (originalText.length > 0) {
-      translateText(originalText, targetLanguage);
+      translateWithAPI(originalText, targetLanguage);
     }
   };
 
@@ -165,12 +98,11 @@ export default function Information(props) {
         </button>
         <button
           onClick={() => setTab("translation")}
-          disabled={isTranslatorLoading}
           className={`w-1/2 py-2 transition duration-200 ${
             tab === "translation"
               ? "bg-primary-500 text-white"
               : "text-primary-300 hover:bg-primary-600 hover:text-white"
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
+          }`}
         >
           Prevod
         </button>
@@ -184,7 +116,7 @@ export default function Information(props) {
               value={targetLanguage}
               onChange={(e) => setTargetLanguage(e.target.value)}
               className="bg-white/10 text-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500 border border-white/20 appearance-none px-3 py-2 w-40"
-              disabled={translating || isTranslatorLoading}
+              disabled={translating}
             >
               <option value="sr">Srpski</option>
               <option value="es">Španski</option>
@@ -193,25 +125,15 @@ export default function Information(props) {
               <option value="it">Italijanski</option>
             </select>
           </div>
-          
-          {isTranslatorLoading && (
-            <div className="text-yellow-400 text-sm">
-              Učitavam model za prevođenje... (prvi put može potrajati)
-            </div>
-          )}
         </div>
       )}
 
       <div className="my-8 flex flex-col items-center w-full gap-6">
-        {(!finished || translating || isTranslatorLoading) && (
+        {(!finished || translating) && (
           <div className="grid place-items-center animate-pulse">
             <i className="fa-solid fa-spinner text-primary-400 text-4xl animate-spin"></i>
             <span className="text-white mt-2">
-              {isTranslatorLoading 
-                ? "Učitavam translator..." 
-                : translating 
-                  ? "Prevodim..." 
-                  : "Transkribujem..."}
+              {translating ? "Prevodim..." : "Transkribujem..."}
             </span>
           </div>
         )}
@@ -235,7 +157,7 @@ export default function Information(props) {
         <button
           onClick={handleCopy}
           title="Copy"
-          disabled={translating || isTranslatorLoading || textElement.length === 0}
+          disabled={translating || textElement.length === 0}
           className="py-2 px-4 bg-white/10 rounded-xl hover:bg-primary-600 transition text-primary-400 hover:text-white shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <i className="fa-solid fa-copy"></i>
@@ -243,7 +165,7 @@ export default function Information(props) {
         <button
           onClick={handleDownload}
           title="Download"
-          disabled={translating || isTranslatorLoading || textElement.length === 0}
+          disabled={translating || textElement.length === 0}
           className="py-2 px-4 bg-white/10 rounded-xl hover:bg-primary-600 transition text-primary-400 hover:text-white shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <i className="fa-solid fa-download"></i>
