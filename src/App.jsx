@@ -5,14 +5,16 @@ import FileDisplay from "./components/file_display/FileDisplay";
 import Information from "./components/info/Information";
 import Transcribing from "./components/transcribe/Transcribing";
 import { MessageTypes } from "./utils/presets";
+import { AuthProvider, useAuth } from "./utils/AuthContext";
 
-function App() {
+function AppContent() {
   const [file, setFile] = useState(null);
   const [audioStream, setAudioStream] = useState(null);
   const [output, setOutput] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [finished, setFinished] = useState(false);
+  const { user } = useAuth(); 
 
   const isAudioAvailable = file || audioStream;
 
@@ -37,19 +39,15 @@ function App() {
       switch (e.data.type) {
         case "DOWNLOADING":
           setDownloading(true);
-
           break;
         case "LOADING":
           setLoading(true);
-
           break;
         case "RESULT":
           setOutput(e.data.results);
-
           break;
         case "INFERENCE_DONE":
           setFinished(true);
-
           break;
       }
     };
@@ -58,7 +56,7 @@ function App() {
 
     return () =>
       worker.current.removeEventListener("message", onMessageReceived);
-  });
+  }, []);
 
   async function readAudioFrom(file) {
     const sampling_rate = 16000;
@@ -89,7 +87,12 @@ function App() {
       <section className="flex flex-col gap-8 min-h-screen">
         <Header />
         <main className="flex-1 flex justify-center items-center">
-          {output ? (
+          {!user ? (
+            <div className="text-center p-8 bg-gray-800/50 rounded-xl backdrop-blur-lg">
+              <h2 className="text-2xl mb-4">Molimo prijavite se</h2>
+              <p className="text-gray-300">Da biste koristili XenScribe, morate biti prijavljeni.</p>
+            </div>
+          ) : output ? (
             <Information output={output} finished={finished} />
           ) : loading ? (
             <Transcribing />
@@ -106,6 +109,14 @@ function App() {
         </main>
       </section>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
