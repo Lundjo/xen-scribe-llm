@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useAuth } from "../../utils/AuthContext";
 
 export default function HomePage(props) {
   const { setAudioStream, setFile } = props;
+  const { user } = useAuth();
 
   const [recordingStatus, setRecordingStatus] = useState("inactive");
   const [audioChunks, setAudioChunks] = useState([]);
@@ -13,6 +15,11 @@ export default function HomePage(props) {
   const mimeType = "audio/webm";
 
   async function startRecording() {
+    if (!user) {
+      alert("Morate biti prijavljeni da biste snimali audio");
+      return;
+    }
+
     let tempStream;
     try {
       const streamData = await navigator.mediaDevices.getUserMedia({
@@ -21,6 +28,7 @@ export default function HomePage(props) {
       });
       tempStream = streamData;
     } catch (err) {
+      alert("Greška pri pristupu mikrofonu");
       return;
     }
     setRecordingStatus("recording");
@@ -50,6 +58,11 @@ export default function HomePage(props) {
   }
 
   const handleFileChange = (e) => {
+    if (!user) {
+      alert("Morate biti prijavljeni da biste uploadovali fajlove");
+      return;
+    }
+
     const file = e.target.files[0];
     if (!file) return;
 
@@ -65,6 +78,10 @@ export default function HomePage(props) {
   };
 
   const triggerFileInput = () => {
+    if (!user) {
+      alert("Morate biti prijavljeni da biste uploadovali fajlove");
+      return;
+    }
     fileInputRef.current.click();
   };
 
@@ -89,54 +106,64 @@ export default function HomePage(props) {
           <span className="text-red-500">*</span>
         </h3>
 
-        <div className="flex gap-4 w-full mb-4">
-          <button
-            onClick={
-              recordingStatus === "recording" ? stopRecording : startRecording
-            }
-            className="flex items-center justify-center gap-x-4 px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-200 bg-primary-500 flex-1"
-          >
-            <i
-              className={`fa-solid fa-microphone ${
-                recordingStatus === "recording"
-                  ? "text-red-500 animate-pulse"
-                  : "text-white/80"
-              }`}
-            ></i>
-            <span>
-              {recordingStatus === "inactive"
-                ? "Pokreni audio snimanje"
-                : "Zaustavi snimanje"}
-            </span>
-            <div className="flex items-center gap-2">
-              {duration > 0 && (
-                <p className="text-sm font-medium text-white/80 pr-1">
-                  {duration}s
-                </p>
-              )}
+        {!user ? (
+          <div className="py-6">
+            <p className="text-white/80 mb-4">
+              Prijavite se da biste koristili usluge transkripcije
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-4 w-full mb-4">
+              <button
+                onClick={
+                  recordingStatus === "recording" ? stopRecording : startRecording
+                }
+                className="flex items-center justify-center gap-x-4 px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-200 bg-primary-500 flex-1"
+              >
+                <i
+                  className={`fa-solid fa-microphone ${
+                    recordingStatus === "recording"
+                      ? "text-red-500 animate-pulse"
+                      : "text-white/80"
+                  }`}
+                ></i>
+                <span>
+                  {recordingStatus === "inactive"
+                    ? "Pokreni audio snimanje"
+                    : "Zaustavi snimanje"}
+                </span>
+                <div className="flex items-center gap-2">
+                  {duration > 0 && (
+                    <p className="text-sm font-medium text-white/80 pr-1">
+                      {duration}s
+                    </p>
+                  )}
+                </div>
+              </button>
+
+              <button
+                onClick={triggerFileInput}
+                className="flex items-center justify-center gap-x-4 px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-200 bg-gray-500/50 hover:bg-gray-500/70 flex-1"
+              >
+                <i className="fa-solid fa-file-audio text-white/80"></i>
+                <span>Izaberi audio fajl</span>
+              </button>
             </div>
-          </button>
 
-          <button
-            onClick={triggerFileInput}
-            className="flex items-center justify-center gap-x-4 px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-200 bg-gray-500/50 hover:bg-gray-500/70 flex-1"
-          >
-            <i className="fa-solid fa-file-audio text-white/80"></i>
-            <span>Izaberi audio fajl</span>
-          </button>
-        </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="audio/*"
+              className="hidden"
+            />
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="audio/*"
-          className="hidden"
-        />
-
-        <p className="italic text-sm text-slate-400 mt-2">
-          <span className="text-red-500">*</span> samo engleski jezik
-        </p>
+            <p className="italic text-sm text-slate-400 mt-2">
+              <span className="text-red-500">*</span> samo engleski jezik
+            </p>
+          </>
+        )}
       </div>
     </main>
   );
