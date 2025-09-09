@@ -19,7 +19,7 @@ export default function Information(props) {
 
     setTranslating(true);
     setTranslationError("");
-    setTranslatedText(""); // Resetuj prethodni prevod
+    setTranslatedText("");
     
     try {
       const langCodes = {
@@ -33,7 +33,8 @@ export default function Information(props) {
       const langpair = `en|${langCodes[targetLang]}`;
       const encodedText = encodeURIComponent(text);
       
-      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodedText}&langpair=${langpair}`);
+      const link = import.meta.env.VITE_MYMEMORY_TRANSLATED_LINK;
+      const response = await fetch(`${link}get?q=${encodedText}&langpair=${langpair}`);
       
       if (!response.ok) {
         throw new Error("API greška");
@@ -57,13 +58,13 @@ export default function Information(props) {
     if (tab === "translation" && originalText.length > 0) {
       translateWithAPI(originalText, targetLanguage);
     } else if (tab === "translation") {
-      setTranslatedText(""); // Resetuj prevod ako nema teksta
+      setTranslatedText("");
     }
   }, [tab, targetLanguage, originalText]);
 
   const handleLanguageChange = (e) => {
     setTargetLanguage(e.target.value);
-    setTranslatedText(""); // Resetuj prethodni prevod pri promeni jezika
+    setTranslatedText(""); 
   };
 
   function handleCopy() {

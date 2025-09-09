@@ -19,3 +19,8 @@ Run this command via terminal from project folder: `npm i @xenova/transformers`
 
 (For more details, visit: https://github.com/xenova/transformers.js )
 
+## Include link to MyMemory Translated
+
+Provide a link to MyMemory Translated in your .env file for translating transcriptions: https://api.mymemory.translated.net/
+
+(For more details about the service visit: https://mymemory.translated.net/ )
